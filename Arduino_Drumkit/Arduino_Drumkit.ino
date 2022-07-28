@@ -69,7 +69,7 @@ int MaxPlayTime[6] = {
 //  90,90,90,90,90,90};        // Original code
   60,60,60,60,60,60};        // Cycles before a 2nd hit is allowed
   
-#define  midichannel 1;      // MIDI channel from 0 to 15 (+1 in "real world")
+int midichannel = 0;      // MIDI channel from 0 to 15 (+1 in "real world")
 boolean VelocityFlag  = true;   // Velocity ON (true) or OFF (false)
 
 //*******************************************************************************************************************
@@ -111,23 +111,30 @@ void loop()
 {
   // read the state of the pushbutton value:
   buttonState = digitalRead(buttonPin);
-
+  
   // pushbutton state change
   if (lastButtonState == 0 && buttonState == 1)
   {
     if (controlState == 0)
     {
-      digitalWrite(ledPin, HIGH);
+      //digitalWrite(ledPin, HIGH);
       controlState = 1;
     }
     else
     {
-      digitalWrite(ledPin, LOW);
+      //digitalWrite(ledPin, LOW);
       controlState = 0;
     }
   }
   lastButtonState = buttonState;
   //delay(100);
+
+  if (controlState == 0) {
+    digitalWrite(ledPin, HIGH);
+  }
+  else {
+    digitalWrite(ledPin, LOW);
+  }
   
   for(int pin=0; pin < 6; pin++)                                             
   {
@@ -192,6 +199,7 @@ void loop()
 //*******************************************************************************************************************
 void MIDI_TX(byte MESSAGE, byte PITCH, byte VELOCITY) 
 {
+  midichannel = controlState;
   status1 = MESSAGE + midichannel;
   Serial.write(status1);
   Serial.write(PITCH);
