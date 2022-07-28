@@ -115,16 +115,16 @@ void loop()
   // pushbutton state change
   if (lastButtonState == 0 && buttonState == 1)
   {
-    if (controlState == 0)
+    if (controlState == 15)
     {
       //digitalWrite(ledPin, HIGH);
-      controlState = 1;
+      controlState = 0;
     }
     else
     {
       //digitalWrite(ledPin, LOW);
-      controlState = 0;
-    }
+      controlState += 1;
+    };
   }
   lastButtonState = buttonState;
   //delay(100);
