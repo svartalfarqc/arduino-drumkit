@@ -17,10 +17,10 @@ char pinAssignments[6] ={
 
 // Ugritone Kult Drums II mapping
 
-// Mapping with HiHat and Kick drum
+// Mapping without HiHat and Kick drum
 byte PadNote1[6] = {
-  44, // HiHat closed
-  36, // Kick
+  52, // China1
+  48, // Tom1
   43, // Tom4
   38, // Snare
   51, // Ride
@@ -49,10 +49,10 @@ byte PadNote1[6] = {
   //60, // China2
   };         // MIDI notes from 0 to 127 (Mid C = 60)
 
-// Mapping without HiHat and Kick drum
+// Mapping with HiHat and Kick drum
 byte PadNote2[6] = {
-  52, // China1
-  48, // Tom1
+  44, // HiHat closed
+  36, // Kick
   43, // Tom4
   38, // Snare
   51, // Ride
@@ -87,10 +87,17 @@ int hitavg = 0;
 
 // pushbutton variables and constants
 const int buttonPin = 2;     // the number of the pushbutton pin
-const int ledPin =  13;      // the number of the LED pin
+const int altButtonPin = 4;     // the number of the pushbutton pin
+const int ledPin1 =  7;      // the number of the LED pin
+const int ledPin2 =  8;      // the number of the LED pin
+const int ledPin3 =  12;      // the number of the LED pin
+const int ledPin4 =  13;      // the number of the LED pin
 int buttonState = 0;         // variable for reading the pushbutton status
 int lastButtonState = 0;
 int controlState = 0;
+int altButtonState = 0;         // variable for reading the pushbutton status
+int altLastButtonState = 0;
+int altControlState = 0;
 
 //*******************************************************************************************************************
 // Setup
@@ -100,7 +107,10 @@ void setup()
   Serial.begin(115200);   // connect to the serial port 115200
   
   // initialize the LED pin as an output:
-  pinMode(ledPin, OUTPUT);
+  pinMode(ledPin1, OUTPUT);
+  pinMode(ledPin2, OUTPUT);
+  pinMode(ledPin3, OUTPUT);
+  pinMode(ledPin4, OUTPUT);
   // initialize the pushbutton pin as an input:
   pinMode(buttonPin, INPUT);
 }
@@ -111,31 +121,133 @@ void loop()
 {
   // read the state of the pushbutton value:
   buttonState = digitalRead(buttonPin);
+  altButtonState = digitalRead(altButtonPin);
   
   // pushbutton state change
   if (lastButtonState == 0 && buttonState == 1)
   {
     if (controlState == 15)
     {
-      //digitalWrite(ledPin, HIGH);
       controlState = 0;
     }
     else
     {
-      //digitalWrite(ledPin, LOW);
       controlState += 1;
     };
   }
   lastButtonState = buttonState;
-  //delay(100);
 
-  if (controlState == 0) {
-    digitalWrite(ledPin, HIGH);
+  // pushbutton state change
+  if (altLastButtonState == 0 && altButtonState == 1)
+  {
+    if (altControlState == 0)
+    {
+      altControlState = 1;
+    }
+    else
+    {
+      altControlState = 0;
+    };
   }
-  else {
-    digitalWrite(ledPin, LOW);
-  }
+  altLastButtonState = altButtonState;
   
+  if (controlState == 0) {
+    digitalWrite(ledPin1, LOW);
+    digitalWrite(ledPin2, LOW);
+    digitalWrite(ledPin3, LOW);
+    digitalWrite(ledPin4, LOW);
+  }
+  else if (controlState == 1){
+    digitalWrite(ledPin1, LOW);
+    digitalWrite(ledPin2, LOW);
+    digitalWrite(ledPin3, LOW);
+    digitalWrite(ledPin4, HIGH);
+  }
+  else if (controlState == 2){
+    digitalWrite(ledPin1, LOW);
+    digitalWrite(ledPin2, LOW);
+    digitalWrite(ledPin3, HIGH);
+    digitalWrite(ledPin4, LOW);
+  }
+  else if (controlState == 3){
+    digitalWrite(ledPin1, LOW);
+    digitalWrite(ledPin2, LOW);
+    digitalWrite(ledPin3, HIGH);
+    digitalWrite(ledPin4, HIGH);
+  }
+  else if (controlState == 4){
+    digitalWrite(ledPin1, LOW);
+    digitalWrite(ledPin2, HIGH);
+    digitalWrite(ledPin3, LOW);
+    digitalWrite(ledPin4, LOW);
+  }
+  else if (controlState == 5){
+    digitalWrite(ledPin1, LOW);
+    digitalWrite(ledPin2, HIGH);
+    digitalWrite(ledPin3, LOW);
+    digitalWrite(ledPin4, HIGH);
+  }
+  else if (controlState == 6){
+    digitalWrite(ledPin1, LOW);
+    digitalWrite(ledPin2, HIGH);
+    digitalWrite(ledPin3, HIGH);
+    digitalWrite(ledPin4, LOW);
+  }
+  else if (controlState == 7){
+    digitalWrite(ledPin1, LOW);
+    digitalWrite(ledPin2, HIGH);
+    digitalWrite(ledPin3, HIGH);
+    digitalWrite(ledPin4, HIGH);
+  }
+  else if (controlState == 8){
+    digitalWrite(ledPin1, HIGH);
+    digitalWrite(ledPin2, LOW);
+    digitalWrite(ledPin3, LOW);
+    digitalWrite(ledPin4, LOW);
+  }
+  else if (controlState == 9){
+    digitalWrite(ledPin1, HIGH);
+    digitalWrite(ledPin2, LOW);
+    digitalWrite(ledPin3, LOW);
+    digitalWrite(ledPin4, HIGH);
+  }
+  else if (controlState == 10){
+    digitalWrite(ledPin1, HIGH);
+    digitalWrite(ledPin2, LOW);
+    digitalWrite(ledPin3, HIGH);
+    digitalWrite(ledPin4, LOW);
+  }
+  else if (controlState == 11){
+    digitalWrite(ledPin1, HIGH);
+    digitalWrite(ledPin2, LOW);
+    digitalWrite(ledPin3, HIGH);
+    digitalWrite(ledPin4, HIGH);
+  }
+  else if (controlState == 12){
+    digitalWrite(ledPin1, HIGH);
+    digitalWrite(ledPin2, HIGH);
+    digitalWrite(ledPin3, LOW);
+    digitalWrite(ledPin4, LOW);
+  }
+  else if (controlState == 13){
+    digitalWrite(ledPin1, HIGH);
+    digitalWrite(ledPin2, HIGH);
+    digitalWrite(ledPin3, LOW);
+    digitalWrite(ledPin4, HIGH);
+  }
+  else if (controlState == 14){
+    digitalWrite(ledPin1, HIGH);
+    digitalWrite(ledPin2, HIGH);
+    digitalWrite(ledPin3, HIGH);
+    digitalWrite(ledPin4, LOW);
+  }
+  else if (controlState == 15){
+    digitalWrite(ledPin1, HIGH);
+    digitalWrite(ledPin2, HIGH);
+    digitalWrite(ledPin3, HIGH);
+    digitalWrite(ledPin4, HIGH);
+  }
+
   for(int pin=0; pin < 6; pin++)                                             
   {
     hitavg = analogRead(pinAssignments[pin]);  
@@ -156,7 +268,7 @@ void loop()
         }
 
         // Set note depending on pushbutton state
-        if (controlState == 0)
+        if (altControlState == 0)
         {
           MIDI_TX(144,PadNote1[pin],hitavg); //note on
         }
@@ -181,7 +293,7 @@ void loop()
         activePad[pin] = false;
 
         // Set note depending on pushbutton state
-        if (controlState == 0)
+        if (altControlState == 0)
         {
           MIDI_TX(144,PadNote1[pin],0); 
         }
