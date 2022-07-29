@@ -1,10 +1,12 @@
-//Inspired by this instructable: https://www.instructables.com/MIDI-Arduino-Drums/
+//Inspired by this instructable by user anouskadg: https://www.instructables.com/MIDI-Arduino-Drums/
 //Originally adapted from Jenna deBoisblanc and Spiekenzie Labs initial code
 //https://www.instructables.com/Arduino-Xylophone/
 
 // Adjustments made to original code:
-// - Mapping to Ugritone Kult Drums II notes
+// - Mapping to Ugritone Kult Drums II notes (https://ugritone.com/products/kvlt-drums-ii)
 // - Added a pushbutton to change pin to note mapping
+// - Added a pushbutton to change output from midi channel 1 to 16
+// - Added 4 LEDs to show currently selected midi channel in binary
 
 //*******************************************************************************************************************
 // User settable variables
@@ -17,7 +19,7 @@ char pinAssignments[6] ={
 
 // Ugritone Kult Drums II mapping
 
-// Mapping without HiHat and Kick drum
+// Mapping WITHOUT HiHat and Kick drum
 byte PadNote1[6] = {
   52, // China1
   48, // Tom1
@@ -25,7 +27,7 @@ byte PadNote1[6] = {
   38, // Snare
   51, // Ride
   57 // Crash2
-
+  
   // NOTE BANK
   //32, // HiHat
   //36, // Kick
@@ -49,7 +51,8 @@ byte PadNote1[6] = {
   //60, // China2
   };         // MIDI notes from 0 to 127 (Mid C = 60)
 
-// Mapping with HiHat and Kick drum
+// Mapping WITH HiHat and Kick drum (gougoune mode)
+// https://www.je-parle-quebecois.com/lexique/definition/gougoune.html
 byte PadNote2[6] = {
   44, // HiHat closed
   36, // Kick
@@ -59,15 +62,8 @@ byte PadNote2[6] = {
   57 // Crash2
   };
   
-
-int PadCutOff[6] = 
-{
-//  400,400,400,400,400,400};  // Original code
-  200,200,200,200,200,200};  // Minimum Analog value to cause a drum hit
-
-int MaxPlayTime[6] = {
-//  90,90,90,90,90,90};        // Original code
-  60,60,60,60,60,60};        // Cycles before a 2nd hit is allowed
+int PadCutOff[6] = {200,200,200,200,200,200};  // Minimum Analog value to cause a drum hit (original code was 400)
+int MaxPlayTime[6] = {60,60,60,60,60,60};        // Cycles before a 2nd hit is allowed (original code says 90)
   
 int midichannel = 0;      // MIDI channel from 0 to 15 (+1 in "real world")
 boolean VelocityFlag  = true;   // Velocity ON (true) or OFF (false)
@@ -75,13 +71,10 @@ boolean VelocityFlag  = true;   // Velocity ON (true) or OFF (false)
 //*******************************************************************************************************************
 // Internal Use Variables
 //*******************************************************************************************************************
-boolean activePad[6] = {
-  0,0,0,0,0,0};     // Array of flags of pad currently playing
-int PinPlayTime[6] = {
-  0,0,0,0,0,0};     // Counter since pad started to play
+boolean activePad[6] = {0,0,0,0,0,0};     // Array of flags of pad currently playing
+int PinPlayTime[6] = {0,0,0,0,0,0};     // Counter since pad started to play
 
 byte status1;
-
 int pin = 0;     
 int hitavg = 0;
 
@@ -92,33 +85,37 @@ const int ledPin1 =  7;      // the number of the LED pin
 const int ledPin2 =  8;      // the number of the LED pin
 const int ledPin3 =  12;      // the number of the LED pin
 const int ledPin4 =  13;      // the number of the LED pin
-int buttonState = 0;         // variable for reading the pushbutton status
+
+// pushbutton to select midi channel
+int buttonState = 0;
 int lastButtonState = 0;
 int controlState = 0;
-int altButtonState = 0;         // variable for reading the pushbutton status
+
+// pushbutton to select "alt" mode (alternate pin mapping) a.k.a. gougoune mode
+int altButtonState = 0;
 int altLastButtonState = 0;
 int altControlState = 0;
 
-//*******************************************************************************************************************
-// Setup
-//*******************************************************************************************************************
+/**
+  Setup
+*/
 void setup() 
 {
   Serial.begin(115200);   // connect to the serial port 115200
   
-  // initialize the LED pin as an output:
+  // initialize the LED pins as an output:
   pinMode(ledPin1, OUTPUT);
   pinMode(ledPin2, OUTPUT);
   pinMode(ledPin3, OUTPUT);
   pinMode(ledPin4, OUTPUT);
-  // initialize the pushbutton pin as an input:
+  // initialize the pushbutton pins as an input:
   pinMode(buttonPin, INPUT);
 }
-//*******************************************************************************************************************
-// Main Program
-//*******************************************************************************************************************
-void loop() 
-{
+
+/**
+  Read pushbuttons and adjust LEDs as needed
+*/
+void readPushButtons(){
   // read the state of the pushbutton value:
   buttonState = digitalRead(buttonPin);
   altButtonState = digitalRead(altButtonPin);
@@ -137,7 +134,7 @@ void loop()
   }
   lastButtonState = buttonState;
 
-  // pushbutton state change
+  // alt pushbutton state change
   if (altLastButtonState == 0 && altButtonState == 1)
   {
     if (altControlState == 0)
@@ -150,7 +147,8 @@ void loop()
     };
   }
   altLastButtonState = altButtonState;
-  
+
+  // adjust LEDs to show current pushbutton state
   if (controlState == 0) {
     digitalWrite(ledPin1, LOW);
     digitalWrite(ledPin2, LOW);
@@ -247,7 +245,12 @@ void loop()
     digitalWrite(ledPin3, HIGH);
     digitalWrite(ledPin4, HIGH);
   }
+}
 
+/**
+  Read input pads and send midi signals
+*/
+void readMidi(){
   for(int pin=0; pin < 6; pin++)                                             
   {
     hitavg = analogRead(pinAssignments[pin]);  
@@ -267,14 +270,14 @@ void loop()
           hitavg = 127;
         }
 
-        // Set note depending on pushbutton state
+        // Set note mapping depending on alt pushbutton state
         if (altControlState == 0)
         {
-          MIDI_TX(144,PadNote1[pin],hitavg); //note on
+          MIDI_TX(144,PadNote1[pin],hitavg);
         }
         else
         {
-          MIDI_TX(144,PadNote2[pin],hitavg); //note on
+          MIDI_TX(144,PadNote2[pin],hitavg);
         }
         
         PinPlayTime[pin] = 0;
@@ -292,7 +295,7 @@ void loop()
       {
         activePad[pin] = false;
 
-        // Set note depending on pushbutton state
+        // Set note mapping depending on alt pushbutton state
         if (altControlState == 0)
         {
           MIDI_TX(144,PadNote1[pin],0); 
@@ -304,6 +307,18 @@ void loop()
       }
     }
   } 
+}
+
+/**
+  Main program
+*/
+void loop() 
+{
+  // read pushbuttons and adjust LEDs as needed
+  readPushButtons();
+
+  // read input pads and send midi signals
+  readMidi();
 }
 
 //*******************************************************************************************************************
