@@ -110,6 +110,7 @@ void setup()
   pinMode(ledPin4, OUTPUT);
   // initialize the pushbutton pins as an input:
   pinMode(buttonPin, INPUT);
+  pinMode(altButtonPin, INPUT);
 }
 
 /**
