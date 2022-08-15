@@ -13,9 +13,7 @@
 //*******************************************************************************************************************
 int pinRead;
 
-char pinAssignments[6] ={
-  A0,A1,A2,A3,A4,A5
-};
+char pinAssignments[6] ={A0,A1,A2,A3,A4,A5};
 
 // Ugritone Kult Drums II mapping
 
@@ -51,10 +49,10 @@ byte PadNote1[6] = {
   //60, // China2
   };         // MIDI notes from 0 to 127 (Mid C = 60)
 
-// Mapping WITH HiHat and Kick drum (gougoune mode)
+// Mapping WITH Kick drum (gougoune mode)
 // https://www.je-parle-quebecois.com/lexique/definition/gougoune.html
 byte PadNote2[6] = {
-  44, // HiHat closed
+  36, // Kick
   36, // Kick
   43, // Tom4
   38, // Snare
