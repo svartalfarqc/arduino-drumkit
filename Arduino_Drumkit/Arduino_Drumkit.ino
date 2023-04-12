@@ -147,7 +147,8 @@ void readPushButtons(){
   }
   altLastButtonState = altButtonState;
 
-  // adjust LEDs to show current pushbutton state
+  // Adjust LEDs to show current pushbutton state
+  // There is definitely no more elegant way to do this
   if (controlState == 0) {
     digitalWrite(ledPin1, LOW);
     digitalWrite(ledPin2, LOW);
