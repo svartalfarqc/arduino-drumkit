@@ -12,4 +12,5 @@ https://www.instructables.com/Arduino-Xylophone/
 - Added a pushbutton to change output from midi channel 1 to 16
 - Added 4 LEDs to show currently selected midi channel in binary
 
+# Fritzing breadboard
 ![Fritzing image](./adruino-drumkit-fritzing_bb.png)
