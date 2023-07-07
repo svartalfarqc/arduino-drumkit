@@ -19,7 +19,7 @@ char pinAssignments[12] ={A0,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11};
 
 // Mapping WITHOUT HiHat and Kick drum
 byte PadNote1[12] = {
-  44, // HiHat closed
+  46, // HiHat open
   48, // Tom1
   43, // Tom4
   38, // Snare
